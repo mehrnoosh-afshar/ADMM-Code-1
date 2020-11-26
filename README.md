@@ -10,3 +10,4 @@ ADMM C++ stand alone implementation is located in the CppApp folder
 ## To Do
 * Remove Matlab libraries from Project 3
 * Rename Project 3 folder
+* Test BFGS performance
