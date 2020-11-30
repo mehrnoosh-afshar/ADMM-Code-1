@@ -26,6 +26,7 @@
 		std::string  material_name;
 		double energy; // say is strain energy density term
 		VecX gradient;
+		Eigen::MatrixXd Hesssian; 
 		inline void set_meachanicalproperties(double e, double nu0);
 		inline void matrial_name_category(const char* category);
 		inline void density_enery_term(Eigen::MatrixXd& S);
@@ -90,7 +91,10 @@
 				gradient.resize(2, 1);
 				gradient << 0.5f * miu * (2 * S(0) * std::pow(J, -2.0f / 3.0f) - (2.0f / 3.0f) * S(1) * std::pow(J, -5.0f / 3.0f) * I) + k * S(1) * (J - 1),
 					0.5f * miu * (2 * S(1) * std::pow(J, -2.0f / 3.0f) - (2.0f / 3.0f) * S(0) * std::pow(J, -5.0f / 3.0f) * I) +  k * S(0) * (J - 1);
-					
+				Hesssian.resize(2, 2);
+				Hesssian << 0.5f * miu * (-0.6667f * pow(J, -2.0 / 3.2) + (10.0 / 9.0) * I * std::pow(J, -8.0 / 3.0) * S(1) * S(1)) + k * S(1) * S(1), 2 * k * J - k - (4.0 / 9.0) * miu * pow(J, -5.0 / 3.2) * I,
+					2 * k * J - k - (4.0 / 9.0) * miu * pow(J, -5.0 / 3.2) * I, 0.5f * miu * (-0.6667f * pow(J, -2.0 / 3.2) + (10.0 / 9.0) * I * std::pow(J, -8.0 / 3.0) * S(0) * S(0)) + k * S(0) * S(0);
+				
 			}
 			else
 			{
@@ -98,6 +102,17 @@
 				gradient << 0.5 * miu * (2 * S(0) * std::pow(J, -2 / 3) - (2 / 3) * S(1) *S(2)* std::pow(J, -5 / 3) * I) +  k * S(1) *S(2)* (J - 1),
 					0.5 * miu * (2 * S(1) * std::pow(J, -2 / 3) - (2 / 3) * S(0) *S(2)* std::pow(J, -5 / 3) * I) +  k * S(0) *S(2)* (J - 1),
 					0.5 * miu * (2 * S(2) * std::pow(J, -2 / 3) - (2 / 3) * S(0) * S(1) * std::pow(J, -5 / 3) * I) +  k * S(0) * S(1) * (J - 1);
+				Hesssian.resize(3, 3);
+				Hesssian << 0.5f * miu * (-0.6667f * pow(J, -2.0 / 3.2) + (10.0 / 9.0) * I * std::pow(J, -8.0 / 3.0) * S(1) * S(1) * S(2) * S(2)) + k * S(1) * S(1) * S(2) * S(2),
+					2 * k * J * S(2) - k * S(2) - 0.5 * miu * std::pow(J, -5.0 / 3.0) * ((4.0 / 3.0) * S(0) * S(0) * S(2) + (4.0 / 3.0) * S(1) * S(1) * S(2) + (4.0 / 3.0) * I * S(2) - (10.0 / 9.0) * I * S(2)),
+					2 * k * J * S(1) - k * S(1) - 0.5 * miu * std::pow(J, -5.0 / 3.0) * ((4.0 / 3.0) * S(0) * S(0) * S(1) + (4.0 / 3.0) * S(1) * S(2) * S(2) + (4.0 / 3.0) * I * S(1) - (10.0 / 9.0) * I * S(1)),
+					2 * k * J * S(2) - k * S(2) - 0.5 * miu * std::pow(J, -5.0 / 3.0) * ((4.0 / 3.0) * S(0) * S(0) * S(2) + (4.0 / 3.0) * S(1) * S(1) * S(2) + (4.0 / 3.0) * I * S(2) - (10.0 / 9.0) * I * S(2)),
+					0.5f * miu * (-0.6667f * pow(J, -2.0 / 3.2) + (10.0 / 9.0) * I * std::pow(J, -8.0 / 3.0) * S(0) * S(0) * S(2) * S(2)) + k * S(0) * S(0) * S(2) * S(2),
+					2 * k * J * S(0) - k * S(0) - 0.5 * miu * std::pow(J, -5.0 / 3.0) * ((4.0 / 3.0) * S(1) * S(1) * S(0) + (4.0 / 3.0) * S(0) * S(2) * S(2) + (4.0 / 3.0) * I * S(0) - (10.0 / 9.0) * I * S(0)),
+					2 * k * J * S(1) - k * S(1) - 0.5 * miu * std::pow(J, -5.0 / 3.0) * ((4.0 / 3.0) * S(0) * S(0) * S(1) + (4.0 / 3.0) * S(1) * S(2) * S(2) + (4.0 / 3.0) * I * S(1) - (10.0 / 9.0) * I * S(1)),
+					2 * k * J * S(0) - k * S(0) - 0.5 * miu * std::pow(J, -5.0 / 3.0) * ((4.0 / 3.0) * S(1) * S(1) * S(0) + (4.0 / 3.0) * S(0) * S(2) * S(2) + (4.0 / 3.0) * I * S(0) - (10.0 / 9.0) * I * S(0)),
+					0.5f * miu * (-0.6667f * pow(J, -2.0 / 3.2) + (10.0 / 9.0) * I * std::pow(J, -8.0 / 3.0) * S(0) * S(0) * S(1) * S(1)) + k * S(0) * S(0) * S(1) * S(1);
+
 			}
 			
 			
