@@ -9,6 +9,7 @@
 #ifdef EIGEN_USE_MKL_VML
 #include <Eigen/PardisoSupport>
 #endif
+#include "Timer.h"
 
 namespace ADMM {
 
@@ -51,7 +52,7 @@ namespace ADMM {
 
 		SparseMat A;
 		std::unique_ptr<Cholesky> m_cholesky;
-
+		Eigen::MatrixXd A_inv;
 		LDLTSolver() {
 			m_cholesky = std::unique_ptr<Cholesky>(new Cholesky());
 		}
@@ -61,13 +62,16 @@ namespace ADMM {
 			int dim = A_.rows();
 			if (dim != A_.cols() || dim == 0) { throw std::runtime_error("**LDLTSolver Error: Bad dimensions in A"); }
 			A = A_;
+			Eigen::MatrixXd C = Eigen::MatrixXd::Identity(A.rows(),A.cols());
 			m_cholesky->compute(A);
+			A_inv = m_cholesky->solve(C);
+
 		}
 
 		// Solves for x given A, linear constraints (C), and pinning subspace (P)
 		int solve(VecX& x, const VecX& b0) {
-			x = m_cholesky->solve(b0);
-
+			 // x = m_cholesky->solve(b0);
+		        x = A_inv* b0;	
 			return 1;
 		}
 
