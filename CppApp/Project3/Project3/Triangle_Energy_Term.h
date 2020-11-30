@@ -59,6 +59,6 @@ public:
 	HyperElastic_Triangle HTRI;
 	Vec2 S_ref;
 	cost_function (const Vec3i& Element_Node_index, Eigen::MatrixXd& Global_Node_vector, MaterialModel& mechanical_prop,Vec2& S_ref0);
-	double operator ()(const Eigen::VectorXd& S, Eigen::VectorXd& grad);
+	double operator ()(const Eigen::VectorXd& S, Eigen::VectorXd& grad , Eigen::MatrixXd& Hessian);
 
 };

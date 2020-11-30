@@ -1,4 +1,6 @@
 #include <Eigen/Sparse>
+#include <Eigen/Dense>
+#include <Eigen/LU>
 #include"Triangle_Energy_Term.h"
 #include"signedSVD.h"
 
@@ -146,7 +148,7 @@ cost_function::cost_function(const Vec3i& Element_Node_index, Eigen::MatrixXd& G
 	S_ref = S_ref0;
 }
 
-double cost_function::operator ()(const Eigen::VectorXd& S, Eigen::VectorXd& grad) {
+double cost_function::operator ()(const Eigen::VectorXd& S, Eigen::VectorXd& grad, Eigen::MatrixXd& Hessian) {
 		Eigen::MatrixXd S0 = S;
 		HTRI.mechanical_object.density_enery_term(S0);
 
@@ -154,9 +156,10 @@ double cost_function::operator ()(const Eigen::VectorXd& S, Eigen::VectorXd& gra
 		double c1 = HTRI.mechanical_object.energy * HTRI.area;
 		double c2 = 0.5 *kw* (S - S_ref).squaredNorm();  // need to multiplied bt weight 
 		grad = HTRI.mechanical_object.gradient*HTRI.area + kw * (S - S_ref);
-		
- 
-
+		Hessian = HTRI.mechanical_object.Hesssian * HTRI.area ;   // a term related to kw*(S-S_ref) should be added to hessian
+		// Eigen::Ref<Eigen::Matrix2d> Hesssian0(Hessian);
+		// Hessian = Hesssian0.inverse();
+		//std::cout << Hessian << std::endl;
        return c1+c2;
 
 }

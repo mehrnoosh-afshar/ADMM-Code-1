@@ -2,7 +2,7 @@
 #include <fstream>
 #include <unordered_set>
 #include <unordered_map>
-#include <chrono>
+#include "Timer.h"
 using namespace ADMM;
 using namespace Eigen;
 
@@ -12,6 +12,9 @@ void MultiplyVectorByScalar(std::vector<int>& v, int k) {
 	for_each(v.begin(), v.end(), [k](int& c) { c *= k; });
 }
 
+Solver::Solver() : initialized(false) {
+	//m_constraints = std::make_shared<ConstraintSet>(ConstraintSet());
+}
 void Solver::shape_global_vectors(Eigen::MatrixXd& Global_Node_vector, std::vector<float>& m) {
 
 	int node_number = Global_Node_vector.rows();
@@ -57,15 +60,10 @@ void Solver::shape_external_force() {
 }
 
 
-
-Solver::Solver() : initialized(false) {
-	//m_constraints = std::make_shared<ConstraintSet>(ConstraintSet());
-}
-
 void Solver::solver_step() {
 	if (m_settings.verbose > 0) {
 		std::cout << "\nSimulating with dt: " <<
-			m_settings.timestep_s << "s..." << std::flush;
+			m_settings.timestep_s << "s..." << std::endl;
 	}
 
 
@@ -76,7 +74,7 @@ void Solver::solver_step() {
 	const int n_energyterms = energyterms.size();
 	const int n_threads = std::min(n_energyterms, omp_get_max_threads());
 	m_runtime = RuntimeData(); // reset so for each step we rewrite timer data
-
+	Timer timeclock;
 
 	// Add gravity
 	if (std::abs(m_settings.gravity) > 0) {
@@ -102,12 +100,12 @@ void Solver::solver_step() {
 	for (; s_i < m_settings.admm_iters; ++s_i) {
 
 		// Local step
-		//t.reset(); // strat a time here
+		timeclock.Start(); // strat a time here
         #pragma omp parallel for num_threads(n_threads)
 		for (int i = 0; i < n_energyterms; ++i) {
 			energyterms[i]->update(m_D, curr_x, curr_z, curr_u);  
 		}
-		// m_runtime.local_ms += t.elapsed_ms();
+		m_runtime.local_ms += timeclock.GetDuration();
 
 		// Collision detection, which also updates the BVHs and stuff
 		//t.reset();
@@ -116,7 +114,7 @@ void Solver::solver_step() {
 		//m_runtime.collision_ms += t.elapsed_ms();
 
 		// Global step
-		//t.reset();
+		timeclock.Start();
 		solver_termB.noalias() = M_xbar + solver_Dt_Wt_W * (curr_z - curr_u);
 		solver_termB_prime << solver_termB, solver_term_D; 
 		
@@ -124,7 +122,7 @@ void Solver::solver_step() {
 		VecX curr_x0;
 		m_runtime.inner_iters += m_linsolver->solve(curr_x0, solver_termB_prime);
 		curr_x = curr_x0.segment(0, x_bar.size());
-		// m_runtime.global_ms += t.elapsed_ms(); // add a time here
+		m_runtime.global_ms += timeclock.GetDuration(); // add a time here
 
 	} // end solver loop
 
@@ -140,7 +138,6 @@ bool Solver::initialize(const Settings& settings_) {
 	using namespace Eigen;
 	m_settings = settings_;
 
-	// mcl::MicroTimer t; // intoduce a timer 
 	const int dof = m_x.rows();
 	if (m_settings.verbose > 0) { std::cout << "Solver::initialize: " << std::endl; }
 
