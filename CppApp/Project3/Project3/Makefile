@@ -1,10 +1,10 @@
-# WILL CLEAN UP MAKEFILE LATER
+# TODO: (ddesilva) CLEAN UP MAKEFILE 
 CC = g++
-CFLAGS = -std=c++11 -Wall -g -DNDEBUG -Ofast -march=native 
-CXXFLAGS = -I$(MKLROOT)/include 
+CFLAGS = -std=c++11 -Wall -g -DNDEBUG -Ofast -march=native
+CXXFLAGS = -I$(MKLROOT)/include -DEIGEN_USE_MKL_ALL -DCMAKE_BUILD_TYPE=Release -DEIGEN_TEST_SSE2=ON
 #-DEIGEN_USE_MKL_ALL -DCMAKE_BUILD_TYPE=Release -DEIGEN_TEST_SSE2=ON 
-# LDLIBS += -L$(MKLROOT)/lib
-# LDLIBS += -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -ldl -m64 
+LDLIBS += -L$(MKLROOT)/lib
+LDLIBS += -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -ldl -m64 
 OTHER_FLAGS = $(CXXFLAGS) $(LDLIBS) -framework Accelerate -mfma -ffp-contract=fast -ffast-math -flto -D_GLIBCXX_PARALLEL -fno-math-errno -I/Applications/MATLAB_R2020b.app/extern/include -L/Applications/MATLAB_R2020b.app/bin/maci64 -lmat -lmx -lmex -Xpreprocessor -fopenmp -lomp -I/Users/dinula/Documents/repos/ADMM-Code/LBFGSpp/include -I/usr/local/include/eigen3/
 #OTHER_FLAGS = -O3 -march=native -ffp-contract=fast -I/Users/dinula/Documents/repos/optim/header_only_version -I/usr/local/include/eigen3/ -I/Applications/MATLAB_R2020b.app/extern/include -L/Applications/MATLAB_R2020b.app/bin/maci64 -lmat -lmx -lmex -Xpreprocessor -fopenmp -lomp
 # DINTEL_MKL -DINTEL_MKL_ML -DEIGEN_USE_MKL_ALL -DMKL_DIRECT_CALL -mtune=native -L$(MKLROOT)opt/intel/compilers_and_libraries/mac/mkl/lib -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -ldl
