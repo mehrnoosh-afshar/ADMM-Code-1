@@ -69,7 +69,7 @@ public:
 		return alpha;
 	}
 
-	// takes 0.02 ~ 0.03s 
+	// takes 0.23s 
 	template<typename Foo>
 	void newton(Foo& f, Eigen::VectorXd& x) {
 		int maxIter = 100;
@@ -86,12 +86,13 @@ public:
 				return;
 			}
 			auto gnorm = m_grad.norm();
+			// TODO: (ddesilva) put these values as constants outside of this function
 			if(gnorm <= 1e-3 || gnorm <= 1e-5 * x.norm())
             {
                 return;
             }
 			// x = x - (m_hess.inverse() * m_grad);
-			x = m_hess.householderQr().solve(m_hess*m_grad - m_grad);
+			x = m_hess.householderQr().solve(m_hess*x - m_grad);
 			iter++;
 		}
 	}

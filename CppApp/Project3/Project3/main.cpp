@@ -73,6 +73,7 @@ int main()
     solver_m.solver_step();                                       // Hi this is the step that I need to be faster 
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    std::cout << "result" << solver_m.m_x << "\n";
     std::cout << "" << "time" << std::endl;
     std::cout << elapsed.count() * 1e-9 << "time" << std::endl;
 
