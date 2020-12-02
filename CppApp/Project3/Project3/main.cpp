@@ -9,18 +9,18 @@
 #include"admm_solver.h"
 
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+// #define WIN32_LEAN_AND_MEAN
+// #include <Windows.h>
 
 using namespace Eigen;
 
 int main()
 {
     // 2D exmaple 
-    Triangle_Mesh trimesh;
-    trimesh.read_mesh_data("C:/Users/Mehrnoosh/Desktop/ADMM_matlab/data.mat", "C:/Users/Mehrnoosh/Desktop/ADMM_matlab/data2.mat");
-    trimesh.read_point_indeces("C:/Users/Mehrnoosh/Desktop/ADMM_matlab/Bcindex.mat", "C:/Users/Mehrnoosh/Desktop/ADMM_matlab/Forceindex.mat");
-    trimesh.read_forcevalue("C:/Users/Mehrnoosh/Desktop/ADMM_matlab/ForceValue.mat");
+     Triangle_Mesh trimesh;
+    trimesh.read_mesh_data("data/data.mat", "data/data2.mat");
+    trimesh.read_point_indeces("data/Bcindex.mat", "data/Forceindex.mat");
+    trimesh.read_forcevalue("data/ForceValue.mat");
     trimesh.weighted_masses(1.0);
    // std::cout << trimesh.Bc_index << std::endl; 
    // std::cout << trimesh.force_index << std::endl;

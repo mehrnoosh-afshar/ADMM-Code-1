@@ -68,8 +68,8 @@ namespace ADMM {
 		// Returns the current total number of nodes after insert.
 		// Assumes m is scaled x3 (i.e. 3 values per node).
 
-		void Solver::shape_global_vectors(Eigen::MatrixXd& Global_Node_vector, std::vector<float>& m);
-		void Solver::shape_external_force();
+		void shape_global_vectors(Eigen::MatrixXd& Global_Node_vector, std::vector<float>& m);
+		void shape_external_force();
 		// Returns true on success.
 		virtual bool initialize(const Settings& settings_ = Settings());
 

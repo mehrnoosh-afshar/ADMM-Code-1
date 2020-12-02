@@ -101,7 +101,7 @@ void Solver::solver_step() {
 
 		// Local step
 		timeclock.Start(); // strat a time here
-        #pragma omp parallel for num_threads(n_threads)
+        #pragma omp parallel for num_threads(n_threads) schedule(dynamic)
 		for (int i = 0; i < n_energyterms; ++i) {
 			energyterms[i]->update(m_D, curr_x, curr_z, curr_u);  
 		}
