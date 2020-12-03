@@ -39,7 +39,7 @@ public:
 
             Hessian(i, i ) = hi_i;
             Hessian(i, i + 1) = hi_ii;
-            Hessian(i+1, i + 1) = hii_i;
+            Hessian(i+1, i ) = hii_i;
             Hessian(i+1, i + 1) = hii_ii;
 
         }
