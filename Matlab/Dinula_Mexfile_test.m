@@ -49,7 +49,7 @@ Element_index = Elements'; % This is data2.mat in c++ code
 
 
 %% We want to put a Mexfile Here 
-Final_Node_Cordinate = ADD_Mexfile(Forceindex,Forceindex,Bcindex,Node_corr,Element_index,E,nu);
+Final_Node_Cordinate = ADMM_Mexfile(Forceindex,Forceindex,Bcindex,Node_corr,Element_index,E,nu);
 % Final_Node_Cordinate is the result of optimization 
 
 %% Plot Data 
