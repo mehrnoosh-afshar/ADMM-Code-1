@@ -48,7 +48,7 @@ Node_corr = Nodes';  % This is data.mat in c++ code
 Element_index = Elements'; % This is data2.mat in c++ code 
 
 
-%% I need a Mexfile here that get 
+%% We want to put a Mexfile Here 
 Final_Node_Cordinate = ADD_Mexfile(Forceindex,Forceindex,Bcindex,Node_corr,Element_index,E,nu);
 % Final_Node_Cordinate is the result of optimization 
 
