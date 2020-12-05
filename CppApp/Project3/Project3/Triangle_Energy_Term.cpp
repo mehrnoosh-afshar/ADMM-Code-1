@@ -4,7 +4,7 @@
 #include"Triangle_Energy_Term.h"
 #include"signedSVD.h"
 
-Triangle_Energy_Term::Triangle_Energy_Term(const Vec3i& Element_Node_index, Eigen::MatrixXd & Global_Node_vector, MaterialModel& mechanical_prop):solver(param)
+Triangle_Energy_Term::Triangle_Energy_Term( const Vec3i& Element_Node_index, Eigen::MatrixXd & Global_Node_vector, MaterialModel& mechanical_prop):solver(param)
 {
 	
 	Eigen::Matrix3d D;
@@ -12,14 +12,14 @@ Triangle_Energy_Term::Triangle_Energy_Term(const Vec3i& Element_Node_index, Eige
 	D.row(1) << Global_Node_vector.row(Element_Node_index[1] - 1).col(0), Global_Node_vector.row(Element_Node_index[1] - 1).col(1), 1;
 	D.row(2) << Global_Node_vector.row(Element_Node_index[2] - 1).col(0), Global_Node_vector.row(Element_Node_index[2] - 1).col(1), 1;
 	area = 0.5 * D.determinant();
-
+	
 	if (area < 0) {
-		throw std::runtime_error("**TriEnergyTerm Error: Inverted initial pose Negative area look at Triangle_Energy_Term.cpp ");
+		// throw std::runtime_error("**TriEnergyTerm Error: Inverted initial pose Negative area look at Triangle_Energy_Term.cpp ");
+		area = -area;
 	}
 	double k = mechanical_prop.bulk_modulus;
 	scalar_weight = std::sqrt(k * area);
 
-	
 	for (int i = 0; i < Element_Node_index.size(); i++)
 	{ 
 		verts.push_back(Global_Node_vector.row(Element_Node_index[i] - 1).transpose());
@@ -37,18 +37,23 @@ void Triangle_Energy_Term::get_local_Dmatrix(std::vector< Eigen::Triplet<double>
 
 	
 	global_row_index = weights.size();
-
+	
 	// update weight vector 
 	//std::cout << weights.size() << std::endl;
 	for (int i = 0; i < (dim*dim); ++i) { weights.push_back(scalar_weight); }
 	//std::cout << weights.size() << std::endl;
-	//std::cout << dim * dim << std::endl;
+	//std::cout << weights[3] << std::endl;
+
 	// update D matrix 
 	Eigen::Matrix<double, 2, 2> edges; // B matrix F=b*inv(B);
 	edges.col(0) = verts[1] - verts[0];
 	edges.col(1) = verts[2] - verts[0];
+	//std::cout << verts[0] << std::endl;
+	//std::cout << verts[1] << std::endl;
+	//std::cout << verts[2] << std::endl;
 
 	Eigen::Matrix<double, 2, 2> edges_inv = edges.inverse();
+	//std::cout << edges_inv << std::endl;
 
 	Eigen::Matrix<double, 3, 2> S; // Selector
 	S.setZero();
@@ -60,13 +65,21 @@ void Triangle_Energy_Term::get_local_Dmatrix(std::vector< Eigen::Triplet<double>
 	D_reduction.resize(2, 3);
 	D_reduction = D0.transpose(); // Reduction multiplation of this to node corrdinate gives the transpose of F matrix
 
-	const int rows[2] = { 0, dim};
+	//Eigen::Matrix<double, 3, 2> A0;
+	//A0.setZero();
+	//A0(0, 0) = 0.1;	A0(0, 1) = 0.5;
+	//A0(1, 0) = 0.2; A0(1, 1) = 0.7;
+	//A0(2, 0) = 1; A0(2, 1) = 0.9;
+
+	//Eigen::Matrix<double, 2, 2> DHHH= D_reduction * A0;
+	//std::cout << DHHH << std::endl;
+	const int rows[2] = { 0, dim-1};
 	const int cols[3] = { dim * (Element_Node_index[0] - 1), dim * (Element_Node_index[1] - 1),  dim * (Element_Node_index[2] - 1) };
 	for (int r = 0; r < D_reduction.rows(); ++r) {
 		for (int c = 0; c < D_reduction.cols(); ++c) {
     		double value = D_reduction(r, c);
 			for (int j = 0; j < dim; ++j) {
-				Dmatrix_triplets.emplace_back(rows[r] + j, cols[c] + j, value);
+				Dmatrix_triplets.emplace_back(global_row_index +rows[r] + 2*j, cols[c] + j, value);
 			}
 		}
 	}
@@ -143,7 +156,7 @@ void HyperElastic_Triangle::prox(VecX& zi) {
 //	return mechanical_object.energy*area;
 //}
 
-cost_function::cost_function(const Vec3i& Element_Node_index, Eigen::MatrixXd& Global_Node_vector, MaterialModel& mechanical_prop, Vec2& S_ref0)
+cost_function::cost_function( const Vec3i& Element_Node_index, Eigen::MatrixXd& Global_Node_vector, MaterialModel& mechanical_prop, Vec2& S_ref0)
 	:HTRI(Element_Node_index, Global_Node_vector, mechanical_prop) {
 	S_ref = S_ref0;
 }
@@ -156,7 +169,7 @@ double cost_function::operator ()(const Eigen::VectorXd& S, Eigen::VectorXd& gra
 		double c1 = HTRI.mechanical_object.energy * HTRI.area;
 		double c2 = 0.5 *kw* (S - S_ref).squaredNorm();  // need to multiplied bt weight 
 		grad = HTRI.mechanical_object.gradient*HTRI.area + kw * (S - S_ref);
-		Hessian = HTRI.mechanical_object.Hesssian * HTRI.area+ kw* Eigen::MatrixXd::Identity(HTRI.mechanical_object.Hesssian.rows(), HTRI.mechanical_object.Hesssian.cols()) ;   // a term related to kw*(S-S_ref) should be added to hessian
+		Hessian = HTRI.mechanical_object.Hesssian * HTRI.area + kw* Eigen::MatrixXd::Identity(HTRI.mechanical_object.Hesssian.rows(), HTRI.mechanical_object.Hesssian.cols());   // a term related to kw*(S-S_ref) should be added to hessian
 		// Eigen::Ref<Eigen::Matrix2d> Hesssian0(Hessian);
 		// Hessian = Hesssian0.inverse();
 		//std::cout << Hessian << std::endl;

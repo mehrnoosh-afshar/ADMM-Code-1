@@ -17,7 +17,7 @@ protected:
 
 	double scalar_weight;
 	int dim;
-	Vec3i Element_Node_index;
+	
 	Vec2 S_ref;
 	Eigen::MatrixXd Global_Node_vector;
 	std::vector<Vec2> verts;
@@ -26,11 +26,11 @@ protected:
 	LBFGSpp::LBFGSParam<double> param;
     LBFGSpp::LBFGSSolver<double> solver;
 public:
-	
+	Vec3i Element_Node_index;
 	double area;
 	double get_weight() const { return scalar_weight; }
 	void get_local_Dmatrix(std::vector< Eigen::Triplet<double> >& Dmatrix_triplets , Eigen::MatrixXd& D_reduction , std::vector<double>& weights);
-	Triangle_Energy_Term(const Vec3i& Element_Node_index, Eigen::MatrixXd& Global_Node_vector, MaterialModel& mechanical_prop);
+	Triangle_Energy_Term( const Vec3i& Element_Node_index, Eigen::MatrixXd& Global_Node_vector, MaterialModel& mechanical_prop);
 	void update(const SparseMat& D, const VecX& x, VecX& z, VecX& u);
 	
 	// Unless derived from uses linear strain (no area conservation)
@@ -49,7 +49,7 @@ public:
 	MaterialModel mechanical_object;
 	void prox(VecX& zi);
 	//double cost_function( Eigen::VectorXd& S, Eigen::VectorXd& grad);
-	HyperElastic_Triangle(const Vec3i& Element_Node_index, Eigen::MatrixXd& Global_Node_vector, MaterialModel& mechanical_prop);
+	HyperElastic_Triangle( const Vec3i& Element_Node_index, Eigen::MatrixXd& Global_Node_vector, MaterialModel& mechanical_prop);
 };
 
 class cost_function  {

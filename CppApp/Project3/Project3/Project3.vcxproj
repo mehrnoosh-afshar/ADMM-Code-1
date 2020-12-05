@@ -173,6 +173,7 @@
     <ClInclude Include="MaterialModel.h" />
     <ClInclude Include="signedSVD.h" />
     <ClInclude Include="Tet_Mesh.h" />
+    <ClInclude Include="timer.h" />
     <ClInclude Include="Triangle_Energy_Term.h" />
     <ClInclude Include="Triangle_Mesh.h" />
   </ItemGroup>

@@ -145,7 +145,7 @@ void Triangle_Mesh::read_point_indeces(const char* Bcindeces_path, const char* F
 	{
 		for (int j = 0; j < MBC; j++)
 		{
-			Bc_index(j, i) = *(pr_bc + MBC * i + j);
+			Bc_index(j, i) = *(pr_bc + MBC * i + j)-1; // this -1 is beacuse Matlab indices strat from 1
 		}
 	}
 
@@ -153,7 +153,7 @@ void Triangle_Mesh::read_point_indeces(const char* Bcindeces_path, const char* F
 	{
 		for (int j = 0; j < MNF; j++)
 		{
-			force_index(j, i) = *(pr_force + MNF * i + j);
+			force_index(j, i) = *(pr_force + MNF * i + j)-1; // this -1 is beacuse Matlab indices strat from 1
 		}
 	}
 

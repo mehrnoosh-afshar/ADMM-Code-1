@@ -21,6 +21,8 @@ void Solver::shape_global_vectors(Eigen::MatrixXd& Global_Node_vector, std::vect
 	int size_Dof = node_number * problem_dimension;
 	Eigen::MatrixXd x = Global_Node_vector.transpose();
 	x.resize(size_Dof, 1);
+	
+
 	m_masses.resize(size_Dof, 1);
 	m_x = x;
 	m_v = m_x * 0;
@@ -32,29 +34,23 @@ void Solver::shape_global_vectors(Eigen::MatrixXd& Global_Node_vector, std::vect
 			m_masses[i * problem_dimension + j] = m[i];
 		}
 	}
+
+
 }
 
 void Solver::shape_external_force() {
 
 	int n_force = controlpoints_inds.size();
-
 	std::vector<int> initials;
 	initials = controlpoints_inds;
 	MultiplyVectorByScalar(initials, problem_dimension);
-	//ext_force.resize(m_masses.size());
 	ext_force = VecX::Zero(m_masses.size());
 	for (int i = 0; i < n_force; ++i)
 	{
-		//initials = controlpoints_inds[i];
-		//MultiplyVectorByScalar(initials, problem_dimension);
-		// int length = initials.size();
-		for (int ii = 0; ii < n_force; ++ii)
-		{
 			for (int j = 0; j < problem_dimension; j++)
 			{
-				ext_force[initials[ii] + j] = force_value[i]/ m_masses[initials[ii] + j];
+				ext_force[initials[i] + j] = force_value(i,j)/ m_masses[initials[i] + j];
 			}
-		}
 	}
 	
 }
@@ -87,7 +83,7 @@ void Solver::solver_step() {
 	VecX curr_x = x_bar; // Temperorary x used in optimization
 
 	// Initialize ADMM vars
-	VecX curr_z = m_D * m_x;
+	VecX curr_z = m_D * m_x;  // this  curr_z = m_D * m_x is upon convergence
 	VecX curr_u = VecX::Zero(curr_z.rows());
 	VecX solver_termB = VecX::Zero(dof); // it is a time varying matrix in run time
 	VecX solver_termB_prime = VecX::Zero(dof+solver_term_D.size());
@@ -135,7 +131,7 @@ void Solver::solver_step() {
 } // end timestep iteration
 
 bool Solver::initialize(const Settings& settings_) {
-	using namespace Eigen;
+	
 	m_settings = settings_;
 
 	const int dof = m_x.rows();
@@ -170,23 +166,25 @@ bool Solver::initialize(const Settings& settings_) {
 	Eigen::MatrixXd D_local_reduction;
 	int n_energyterms = energyterms.size(); // this should be equal to the number of elements 
 	for (int i = 0; i < n_energyterms; ++i) {
-		energyterms[i]->get_local_Dmatrix(Dmatrix_triplets, D_local_reduction,weights);	
+		//std::cout << energyterms[i]->Element_Node_index << std::endl;
+		//std::cout << energyterms[i]->get_weight() << std::endl;
+		energyterms[i]->get_local_Dmatrix(Dmatrix_triplets, D_local_reduction,weights);		
 	}
 
 	// Create the Selector+Reduction matrix
-
 	m_W_diag = Eigen::Map<VecX>(&weights[0], weights.size());
 	int n_D_rows = weights.size();
 	m_D.resize(n_D_rows, dof);
 	m_D.setZero();
 	m_D.setFromTriplets(Dmatrix_triplets.begin(), Dmatrix_triplets.end());
-	m_Dt = m_D.transpose();
+    m_Dt = m_D.transpose();
 
 	// Compute mass matrix
 	SparseMat M(dof, dof);
 	Eigen::VectorXi nnz = Eigen::VectorXi::Ones(dof); // non zeros per column
 	M.reserve(nnz);
 	for (int i = 0; i < dof; ++i) { M.coeffRef(i, i) = m_masses[i]; }
+
 
 	// Set global matrices
 	SparseMat W(n_D_rows, n_D_rows);
@@ -212,8 +210,7 @@ bool Solver::initialize(const Settings& settings_) {
 
 	int size_bc = BCpoints_inds.size() * problem_dimension;
 	solver_term_D = VecX::Zero(size_bc);
-	//C.resize(size_bc, dof);
-	//C.reserve(size_bc);
+
 	int j = 0;
 	for (int i = 0; i < BCpoints_inds.size(); i++)
 	{
@@ -255,9 +252,6 @@ bool Solver::initialize(const Settings& settings_) {
 	return true;
 
 } // end init
-
-
-
 
 template<typename T> void myclamp(T& val, T min, T max) { if (val < min) { val = min; } if (val > max) { val = max; } }
 bool Solver::Settings::parse_args(int argc, char** argv) {

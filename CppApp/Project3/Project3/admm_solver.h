@@ -58,7 +58,8 @@ namespace ADMM {
 		VecX ext_force;  // external forces applied to Dofs
 		std::vector<int> surface_inds; // indices of surface vertices
 		std::vector<int> controlpoints_inds; // indices of control points vertices _ the indices should start from zeo
-		std::vector<float>  force_value; // the value of each row (force sets) in controlpoints_inds-_ the indices should start from zeo
+		// std::vector<float>  force_value; // the value of each row (force sets) in controlpoints_inds-_ the indices should start from zeo
+		Eigen::MatrixXd force_value;;
 		std::vector<int> BCpoints_inds;  //indices of BC points  vertices_ the indices should start from zeo
 
 		std::vector< std::shared_ptr< HyperElastic_Triangle> > energyterms; // minimized (implicit) this vector of pointer is where the physical data and
