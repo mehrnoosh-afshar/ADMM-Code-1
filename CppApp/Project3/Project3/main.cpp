@@ -23,9 +23,9 @@ int main()
     
     // 2D exmaple 
     Triangle_Mesh trimesh;
-    trimesh.read_mesh_data("C:/Users/Mehrnoosh/Desktop/ADMM_matlab/data.mat", "C:/Users/Mehrnoosh/Desktop/ADMM_matlab/data2.mat");
-    trimesh.read_point_indeces("C:/Users/Mehrnoosh/Desktop/ADMM_matlab/Bcindex.mat", "C:/Users/Mehrnoosh/Desktop/ADMM_matlab/Forceindex.mat");
-    trimesh.read_forcevalue("C:/Users/Mehrnoosh/Desktop/ADMM_matlab/ForceValue.mat");
+    trimesh.read_mesh_data("data/data.mat", "data/data2.mat");
+    trimesh.read_point_indeces("data/Bcindex.mat", "data/Forceindex.mat");
+    trimesh.read_forcevalue("data/ForceValue.mat");
     double density = 1000; // Kg/m
     trimesh.weighted_masses(density);
     // std::cout << trimesh.Element << std::endl; 
@@ -82,12 +82,13 @@ int main()
     solver_m.shape_external_force();
     solver_m.initialize(settings);
 
-    //auto begin = std::chrono::high_resolution_clock::now();
+    auto begin = std::chrono::high_resolution_clock::now();
     solver_m.solver_step();           // Hi this is the step that I need to be faster 
-    //auto end = std::chrono::high_resolution_clock::now();
-    //auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    //std::cout << "" << "time" << std::endl;
-    //std::cout << elapsed.count() * 1e-9 << "time" << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    std::cout << solver_m.m_x << std::endl;
+    std::cout << "" << "time" << std::endl;
+    std::cout << elapsed.count() * 1e-9 << "time" << std::endl;
     ADMM::Solver::RuntimeData R1;
     R1 = solver_m.runtime_data();
     //std::cout << R1.local_ms << "time" << std::endl;
