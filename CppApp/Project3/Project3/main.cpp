@@ -10,6 +10,7 @@
 //#include "optim.hpp"
 #include"signedSVD.h"
 #include"admm_solver.h"
+#include "mex.h"
 
 
 #define WIN32_LEAN_AND_MEAN
@@ -35,7 +36,7 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> AdmmWithTriangleMesh(Triangle_Mesh& tri
     ADMM::Solver solver_m;
    // solver setting  
     ADMM::Solver::Settings settings;
-    settings.admm_iters = 3;
+    settings.admm_iters = 100;
     settings.gravity = 0.0;
     settings.timestep_s = 0.001;
     std::vector<int> f (&trimesh.force_index(0), trimesh.force_index.data() + trimesh.force_index.cols() * trimesh.force_index.rows());
@@ -74,6 +75,7 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> AdmmWithTriangleMesh(Triangle_Mesh& tri
     std::cout << elapsed.count() * 1e-9 << "time" << std::endl;
     ADMM::Solver::RuntimeData R1;
     R1 = solver_m.runtime_data();
+    return solver_m.m_x;
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
@@ -88,7 +90,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     plhs[0] = mxCreateDoubleMatrix(mxResult.rows(),mxResult.cols(),mxREAL);
     Eigen::Map<Eigen::MatrixXd> map(mxGetPr(plhs[0]), mxResult.rows(), mxResult.cols());
     map = mxResult;
-    return;
 }
 
 void admm(mxArray* forceIndex, mxArray* forceValue, mxArray* Bcindex, mxArray*Node_corr, mxArray* Element_index, int E, double nu) {
@@ -128,8 +129,4 @@ int main()
     //std::cout << solver_m.m_x[3] << std::endl;
     //std::cout << solver_m.m_x[4] << std::endl;
     //std::cout << solver_m.m_x[48] << std::endl;
-
-
-
-
 }

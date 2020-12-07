@@ -68,7 +68,7 @@ void Solver::solver_step() {
 	const int n_nodes = dof / problem_dimension;
 	const double dt = m_settings.timestep_s;
 	const int n_energyterms = energyterms.size();
-	// const int n_threads = std::min(n_energyterms, omp_get_max_threads());
+	const int n_threads = std::min(n_energyterms, omp_get_max_threads());
 	m_runtime = RuntimeData(); // reset so for each step we rewrite timer data
 	Timer timeclock;
 
@@ -97,7 +97,7 @@ void Solver::solver_step() {
 
 		// Local step
 		timeclock.Start(); // strat a time here
-        // #pragma omp parallel for num_threads(n_threads) schedule(dynamic)
+        #pragma omp parallel for num_threads(n_threads) schedule(dynamic)
 		for (int i = 0; i < n_energyterms; ++i) {
 			energyterms[i]->update(m_D, curr_x, curr_z, curr_u);  
 		}

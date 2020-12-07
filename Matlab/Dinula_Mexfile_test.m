@@ -43,13 +43,14 @@ Forceindex = [Nf1';Nf2'];
 Forcevalue = zeros(size(Forceindex,1),1);
 Forcevalue(1:size(Nf1,2),:)= -20;
 Forcevalue(size(Nf1,2)+1:end,:)=  20;
+Forcevalue = [zeros(size(Forcevalue)),Forcevalue];
 Bcindex = NBC';
 Node_corr = Nodes';  % This is data.mat in c++ code 
 Element_index = Elements'; % This is data2.mat in c++ code 
 
 
 %% We want to put a Mexfile Here 
-Final_Node_Cordinate = ADMM_Mexfile(Forceindex,Forceindex,Bcindex,Node_corr,Element_index,E,nu);
+Final_Node_Cordinate = main(Forceindex,Forcevalue,Bcindex,Node_corr,Element_index);
 % Final_Node_Cordinate is the result of optimization 
 
 %% Plot Data 
