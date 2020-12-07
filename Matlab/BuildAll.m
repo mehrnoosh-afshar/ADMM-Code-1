@@ -13,9 +13,11 @@ iPathOpenMP = ['-I', '/usr/local/opt/libomp/include'];
 lPathOpenMP = ['-L', '/usr/local/opt/libomp/lib'];
 iPathMatlab = ['-I', '/Applications/MATLAB_R2020b.app/extern/include'];
 lPathMatlab = ['-L', '/Applications/MATLAB_R2020b.app/bin/maci64'];
-cFlags = ['CxxFLAGS=', '$CxxFLAGS -std=c++11 -fopenmp -lomp -lmat -lmx -lmex -Xpreprocessor -fopenmp -lomp'];
-ldFlags = ['LDFLAGS=', '$LDFLAGS -Xpreprocessor -fopenmp -lomp'];
-mex('-g','-largeArrayDims','-v',ipathEigen,iPathOpenMP,iPathMatlab,lPathMatlab,cFlags,ldFlags,ipathLBFGS,sourceFile1, sourceFile2, sourceFile4);
+cFlags = ['CXXFLAGS=', '$CXXFLAGS -std=c++11 -lmat -lmx -lmex'];
+compFlags = ['COMPFLAGS=', '$COMPFLAGS -Xpreprocessor -fopenmp -lomp'];
+% ldFlags = ['LDFLAGS=', '$LDFLAGS -Xpreprocessor -fopenmp -lomp'];
+ldFlags = ['LDFLAGS=', '$LDFLAGS -Xpreprocessor -fopenmp -lomp -O2'];
+mex('-g','-largeArrayDims','-v',ipathEigen,iPathOpenMP,iPathMatlab,lPathMatlab,cFlags,compFlags,ldFlags,ipathLBFGS,sourceFile1, sourceFile2, sourceFile4);
 fprintf('\n')
 
 % sourceFile = ['MexTest.cpp'];

@@ -5,7 +5,6 @@
 #include"Triangle_Energy_Term.h"
 #include <LBFGS.h>
 //#include <chrono>
-#include <omp.h>
 #include "Timer.h"
 //#include "optim.hpp"
 #include"signedSVD.h"

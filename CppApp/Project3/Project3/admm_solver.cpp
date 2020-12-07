@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include "Timer.h"
+#include <omp.h>
 using namespace ADMM;
 using namespace Eigen;
 
