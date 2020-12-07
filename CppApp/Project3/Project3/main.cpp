@@ -18,25 +18,8 @@
 using namespace Eigen;
 bool myfunction(int i, int j) { return (i < j); }
 
-int main()
-{
-    
-    // 2D exmaple 
-    Triangle_Mesh trimesh;
-    trimesh.read_mesh_data("data/data.mat", "data/data2.mat");
-    trimesh.read_point_indeces("data/Bcindex.mat", "data/Forceindex.mat");
-    trimesh.read_forcevalue("data/ForceValue.mat");
-    double density = 1000; // Kg/m
-    trimesh.weighted_masses(density);
-    // std::cout << trimesh.Element << std::endl; 
-   // std::cout << trimesh.force_value << std::endl;
-   // for (size_t i = 0; i < trimesh.m.size(); i++)
-   // {
-   //     std::cout << trimesh.m[i] << std::endl;
-   // }
-
-   
-   MatrixXd Global_Node_vector;
+Eigen::Matrix<double, Eigen::Dynamic, 1> AdmmWithTriangleMesh(Triangle_Mesh& trimesh) {
+     MatrixXd Global_Node_vector;
    Eigen::MatrixXi Element_Node_index;
 
    Global_Node_vector = trimesh.Node;
@@ -91,6 +74,53 @@ int main()
     std::cout << elapsed.count() * 1e-9 << "time" << std::endl;
     ADMM::Solver::RuntimeData R1;
     R1 = solver_m.runtime_data();
+}
+
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    Triangle_Mesh trimesh;
+    trimesh.load_mesh_data(prhs[3], prhs[4]);
+    trimesh.load_point_indeces(prhs[2], prhs[0]);
+    trimesh.load_forcevalue(prhs[1]);
+    double density = 1000; // Kg/m
+    trimesh.weighted_masses(density);
+    auto mxResult = AdmmWithTriangleMesh(trimesh);
+    std::cout << mxResult << std::endl;
+    plhs[0] = mxCreateDoubleMatrix(mxResult.rows(),mxResult.cols(),mxREAL);
+    Eigen::Map<Eigen::MatrixXd> map(mxGetPr(plhs[0]), mxResult.rows(), mxResult.cols());
+    map = mxResult;
+    return;
+}
+
+void admm(mxArray* forceIndex, mxArray* forceValue, mxArray* Bcindex, mxArray*Node_corr, mxArray* Element_index, int E, double nu) {
+    Triangle_Mesh trimesh;
+    trimesh.load_mesh_data(Node_corr, Element_index);
+    trimesh.load_point_indeces(Bcindex, forceIndex);
+    trimesh.load_forcevalue(forceValue);
+    double density = 1000; // Kg/m
+    trimesh.weighted_masses(density);
+    AdmmWithTriangleMesh(trimesh);
+}
+
+int main()
+{
+    
+    // 2D exmaple 
+    Triangle_Mesh trimesh;
+    trimesh.read_mesh_data("data/data.mat", "data/data2.mat");
+    trimesh.read_point_indeces("data/Bcindex.mat", "data/Forceindex.mat");
+    trimesh.read_forcevalue("data/ForceValue.mat");
+    double density = 1000; // Kg/m
+    trimesh.weighted_masses(density);
+    AdmmWithTriangleMesh(trimesh);
+    // std::cout << trimesh.Element << std::endl; 
+   // std::cout << trimesh.force_value << std::endl;
+   // for (size_t i = 0; i < trimesh.m.size(); i++)
+   // {
+   //     std::cout << trimesh.m[i] << std::endl;
+   // }
+
+   
+  
     //std::cout << R1.local_ms << "time" << std::endl;
     //std::cout << solver_m.m_x[200]  << std::endl;
     //std::cout << solver_m.m_x[100] << std::endl;

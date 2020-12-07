@@ -143,6 +143,7 @@ void HyperElastic_Triangle::prox(VecX& zi) {
 	//std::cout << fm << std::endl;
 
 	int niter = solver.minimize(fcc, Sint, fm);
+	// newton(fcc, Sint);
 	//std::cout << fm << std::endl;
 
 	Mat2 matp = U * Sint.asDiagonal() * V.transpose();

@@ -5,7 +5,7 @@
 #include <string>
 #include <math.h> 
 
-	static enum StringValue {
+	enum StringValue {
 		linearelstic,
 		neo_hookean,
 		odegen

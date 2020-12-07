@@ -41,6 +41,42 @@ public:
 
 }; //
 
+template<typename Foo>
+	void newton(Foo& f, Eigen::VectorXd& x) {
+		int maxIter = 1000;
+		int iter = 0;
+		int n = x.size();
+		Eigen::MatrixXd m_hess;
+		Eigen::VectorXd m_grad;
+		m_hess.resize(n, n);
+		m_grad.resize(n);
+		auto epsilon = 1e-7 * Eigen::MatrixXd::Identity(n, n);
+		for (; ;) {
+			auto fx = f(x, m_grad, m_hess);
+			// auto A = m_hess + epsilon;
+			// std::cout << "Iter : " << iter << " start" << std::endl;
+			// std::cout << "grad norm" << std::endl;
+			// std::cout << m_grad.norm() << std::endl;
+			// std::cout << "eigen values of hessian" << std::endl;
+			// std::cout << m_hess.eigenvalues() << std::endl;
+			// std::cout << "value of cost function" << std::endl;
+			// std::cout << fx << std::endl << std::endl;
+
+			if (iter == maxIter) {
+				return;
+			}
+			auto gnorm = m_grad.norm();
+			// TODO: (ddesilva) put these values as constants outside of this function
+			if(gnorm <= 1e-3 || gnorm <= 1e-5 * x.norm())
+            {
+                return;
+            }
+			// x = x - 0.5*(m_hess.inverse() * m_grad);
+			x = m_hess.llt().solve(m_hess*x - m_grad);
+			iter++;
+		}
+	}
+
 
 class HyperElastic_Triangle : public Triangle_Energy_Term 
 {
