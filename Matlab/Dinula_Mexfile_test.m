@@ -41,8 +41,8 @@ nu=0.49;
 % These are the files that I have read in c++ from mat file
 Forceindex = [Nf1';Nf2'];
 Forcevalue = zeros(size(Forceindex,1),1);
-Forcevalue(1:size(Nf1,2),:)= -20;
-Forcevalue(size(Nf1,2)+1:end,:)=  20;
+Forcevalue(1:size(Nf1,2),:)= -100;
+Forcevalue(size(Nf1,2)+1:end,:)=  100;
 Forcevalue = [zeros(size(Forcevalue)),Forcevalue];
 Bcindex = NBC';
 Node_corr = Nodes';  % This is data.mat in c++ code 
