@@ -3,7 +3,6 @@
 #include <unordered_set>
 #include <unordered_map>
 #include "Timer.h"
-#include <omp.h>
 using namespace ADMM;
 using namespace Eigen;
 
@@ -62,14 +61,12 @@ void Solver::solver_step() {
 		std::cout << "\nSimulating with dt: " <<
 			m_settings.timestep_s << "s..." << std::endl;
 	}
-
-
 	// Other const-variable short names and runtime data
 	const int dof = m_x.rows();
 	const int n_nodes = dof / problem_dimension;
 	const double dt = m_settings.timestep_s;
 	const int n_energyterms = energyterms.size();
-	const int n_threads = std::min(n_energyterms, omp_get_max_threads());
+	// const int n_threads = std::min(n_energyterms, omp_get_max_threads());
 	m_runtime = RuntimeData(); // reset so for each step we rewrite timer data
 	Timer timeclock;
 
@@ -94,11 +91,11 @@ void Solver::solver_step() {
 
 	// Run a timestep
 	int s_i = 0;
-	for (; s_i < m_settings.admm_iters; ++s_i) {
+	for (; s_i < m_settings.admm_iters; ++s_i) {  // Iteration over Global Step 
 
 		// Local step
 		timeclock.Start(); // strat a time here
-        #pragma omp parallel for num_threads(n_threads) schedule(dynamic)
+        // #pragma omp parallel for num_threads(n_threads)
 		for (int i = 0; i < n_energyterms; ++i) {
 			energyterms[i]->update(m_D, curr_x, curr_z, curr_u);  
 		}
@@ -121,11 +118,16 @@ void Solver::solver_step() {
 		curr_x = curr_x0.segment(0, x_bar.size());
 		m_runtime.global_ms += timeclock.GetDuration(); // add a time here
 
+	    // Computing new velocity and setting the new state
+		m_v.noalias() = (curr_x - m_x) * (1.0 / dt);
+		m_x = curr_x;
+
+		x_bar = m_x + dt * m_v + ext_force * std::pow(dt, 2);
+		M_xbar = m_masses.asDiagonal() * x_bar;
+
 	} // end solver loop
 
-	// Computing new velocity and setting the new state
-	m_v.noalias() = (curr_x - m_x) * (1.0 / dt);
-	m_x = curr_x;
+
 
 	// Output run time
 	// if (m_settings.verbose > 0) { m_runtime.print(m_settings); } // check this for run time data 
