@@ -168,9 +168,18 @@ double cost_function::operator ()(const Eigen::VectorXd& S, Eigen::VectorXd& gra
 
 		double kw = HTRI.mechanical_object.bulk_modulus;
 		double c1 = HTRI.mechanical_object.energy * HTRI.area;
-		double c2 = 0.5 *kw* (S - S_ref).squaredNorm();  // need to multiplied bt weight 
-		grad = HTRI.mechanical_object.gradient*HTRI.area + kw * (S - S_ref);
-		Hessian = HTRI.mechanical_object.Hesssian * HTRI.area + kw* Eigen::MatrixXd::Identity(HTRI.mechanical_object.Hesssian.rows(), HTRI.mechanical_object.Hesssian.cols());   // a term related to kw*(S-S_ref) should be added to hessian
+		double w = HTRI.get_weight();
+		double Weight = w * w;
+
+		//double c2 = 0.5 *kw* (S - S_ref).squaredNorm();  // need to multiplied bt weight 
+		//grad = HTRI.mechanical_object.gradient*HTRI.area + kw * (S - S_ref);
+		//Hessian = HTRI.mechanical_object.Hesssian * HTRI.area + kw* Eigen::MatrixXd::Identity(HTRI.mechanical_object.Hesssian.rows(), HTRI.mechanical_object.Hesssian.cols());
+
+		double c2 = 0.5 * Weight * (S - S_ref).squaredNorm();  // need to multiplied bt weight 
+		grad = HTRI.mechanical_object.gradient * HTRI.area + Weight * (S - S_ref);
+		Hessian = HTRI.mechanical_object.Hesssian * HTRI.area + Weight * Eigen::MatrixXd::Identity(HTRI.mechanical_object.Hesssian.rows(), HTRI.mechanical_object.Hesssian.cols());
+
+	
 		// Eigen::Ref<Eigen::Matrix2d> Hesssian0(Hessian);
 		// Hessian = Hesssian0.inverse();
 		//std::cout << Hessian << std::endl;
