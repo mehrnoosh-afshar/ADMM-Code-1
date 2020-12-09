@@ -13,11 +13,15 @@ iPathOpenMP = ['-I', '/usr/local/opt/libomp/include'];
 lPathOpenMP = ['-L', '/usr/local/opt/libomp/lib'];
 iPathMatlab = ['-I', '/Applications/MATLAB_R2020b.app/extern/include'];
 lPathMatlab = ['-L', '/Applications/MATLAB_R2020b.app/bin/maci64'];
+iPathIntelMKL = ['-I', '/opt/intel/compilers_and_libraries_2020.4.301/mac/mkl/include'];
+lPathIntelMKL = ['-I', '/opt/intel/compilers_and_libraries_2020.4.301/mac/mkl/lib'];
 cFlags = ['CXXFLAGS=', '$CXXFLAGS -std=c++11 -lmat -lmx -lmex'];
-compFlags = ['COMPFLAGS=', '$COMPFLAGS -Xpreprocessor -fopenmp -lomp'];
+% ldFlags = ['LDFLAGS=', '$LDFLAGS '];
+% coptimFlags = ['CXXOPTIMFLAGS=', '$CXXOPTIMFLAGS -Ofast'];
+% compFlags = ['COMPFLAGS=', '$COMPFLAGS -Xpreprocessor -fopenmp -lomp'];
 % ldFlags = ['LDFLAGS=', '$LDFLAGS -Xpreprocessor -fopenmp -lomp'];
-ldFlags = ['LDFLAGS=', '$LDFLAGS -Xpreprocessor -fopenmp -lomp -O2'];
-mex('-g','-largeArrayDims','-v',ipathEigen,iPathOpenMP,iPathMatlab,lPathMatlab,cFlags,compFlags,ldFlags,ipathLBFGS,sourceFile1, sourceFile2, sourceFile4);
+% ldFlags = ['LDFLAGS=', '$LDFLAGS -Xpreprocessor -fopenmp -lomp -O2'];
+mex('-largeArrayDims',ipathEigen,iPathOpenMP,iPathMatlab,lPathMatlab,cFlags,ipathLBFGS,sourceFile1, sourceFile2, sourceFile4);
 fprintf('\n')
 
 % sourceFile = ['MexTest.cpp'];

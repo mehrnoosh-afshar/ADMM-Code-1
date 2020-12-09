@@ -6,7 +6,6 @@
 
 
 
-
 class Triangle_Energy_Term
 {
 protected:
@@ -50,17 +49,36 @@ template<typename Foo>
 		Eigen::VectorXd m_grad;
 		m_hess.resize(n, n);
 		m_grad.resize(n);
-		auto epsilon = 1e-7 * Eigen::MatrixXd::Identity(n, n);
+		auto epsilon = 1e-7;
+		auto tau = 0.8;
+		auto alpha = 1.0;
+		auto beta = 0.1;
 		for (; ;) {
 			auto fx = f(x, m_grad, m_hess);
-			// auto A = m_hess + epsilon;
-			// std::cout << "Iter : " << iter << " start" << std::endl;
-			// std::cout << "grad norm" << std::endl;
-			// std::cout << m_grad.norm() << std::endl;
-			// std::cout << "eigen values of hessian" << std::endl;
-			// std::cout << m_hess.eigenvalues() << std::endl;
-			// std::cout << "value of cost function" << std::endl;
-			// std::cout << fx << std::endl << std::endl;
+
+			// ****************** MMODIFYING HESSIAN TO ENSURE POSITIVE DEFINITENESS *************/
+			auto eigenValues = m_hess.eigenvalues();
+			auto minElem = std::min_element(eigenValues.begin(), eigenValues.end(),
+                           [](const std::complex<double>& a, const std::complex<double>& b)
+                             { return abs(a) < abs(b); });
+
+			auto M = std::max(0.0, (*minElem).real()) * Eigen::MatrixXd::Identity(n, n);
+			auto A = m_hess + M;
+			// ****************** MMODIFYING HESSIAN TO ENSURE POSITIVE DEFINITENESS END *************/
+
+			// auto begin2 = std::chrono::high_resolution_clock::now();
+			// **************** LINE SEARCH CODE ************/
+			auto pk = -m_grad;
+			auto newAlpha = alpha;
+			Eigen::MatrixXd temp_1_m_hess;
+			Eigen::VectorXd temp_1_m_grad;
+			Eigen::MatrixXd temp_2_m_hess;
+			Eigen::VectorXd temp_2_m_grad;
+			while (f(x+ newAlpha*pk, temp_1_m_grad, temp_1_m_hess) > (f(x, temp_2_m_grad, temp_2_m_hess) + newAlpha*beta*(m_grad.dot(pk)))) {
+				newAlpha = tau * newAlpha;
+				alpha = newAlpha;
+			}
+			// **************** LINE SEARCH CODE END ************/
 
 			if (iter == maxIter) {
 				return;
@@ -71,8 +89,8 @@ template<typename Foo>
             {
                 return;
             }
-			// x = x - 0.5*(m_hess.inverse() * m_grad);
-			x = m_hess.llt().solve(m_hess*x - m_grad);
+			// x = x - (A.inverse() * m_grad);
+			x = A.llt().solve(A*x - m_grad*alpha);
 			iter++;
 		}
 	}

@@ -71,6 +71,8 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> AdmmWithTriangleMesh(Triangle_Mesh& tri
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
     std::cout << solver_m.m_x << std::endl;
     std::cout << "" << "time" << std::endl;
+    float elapsedDouble = elapsed.count() * 1e-9;
+    mexPrintf("time: %.6f       timeend", elapsedDouble);
     std::cout << elapsed.count() * 1e-9 << "time" << std::endl;
     ADMM::Solver::RuntimeData R1;
     R1 = solver_m.runtime_data();

@@ -51,6 +51,7 @@ Element_index = Elements'; % This is data2.mat in c++ code
 
 %% We want to put a Mexfile Here 
 Final_Node_Cordinate = main(Forceindex,Forcevalue,Bcindex,Node_corr,Element_index);
+norm(Final_Node_Cordinate)
 % Final_Node_Cordinate is the result of optimization 
 
 %% Plot Data 
