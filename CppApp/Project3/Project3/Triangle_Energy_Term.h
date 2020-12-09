@@ -73,7 +73,7 @@ template<typename Foo>
 			Eigen::VectorXd temp_1_m_grad;
 			Eigen::MatrixXd temp_2_m_hess;
 			Eigen::VectorXd temp_2_m_grad;
-			while (f(x+ alpha*pk, temp_1_m_grad, temp_1_m_hess) > (f(x, temp_2_m_grad, temp_2_m_hess) + alpha*beta*(m_grad.dot(pk)))) {
+			while (f(x+ alpha*(pk), temp_1_m_grad, temp_1_m_hess) > (f(x, temp_2_m_grad, temp_2_m_hess) + alpha*beta*(m_grad.dot(pk)))) {
 				alpha = tau * alpha;
 			}
 			// **************** LINE SEARCH CODE END ************/
