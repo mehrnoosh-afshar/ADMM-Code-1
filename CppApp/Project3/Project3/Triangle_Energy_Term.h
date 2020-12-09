@@ -69,14 +69,12 @@ template<typename Foo>
 			// auto begin2 = std::chrono::high_resolution_clock::now();
 			// **************** LINE SEARCH CODE ************/
 			auto pk = -m_grad;
-			auto newAlpha = alpha;
 			Eigen::MatrixXd temp_1_m_hess;
 			Eigen::VectorXd temp_1_m_grad;
 			Eigen::MatrixXd temp_2_m_hess;
 			Eigen::VectorXd temp_2_m_grad;
-			while (f(x+ newAlpha*pk, temp_1_m_grad, temp_1_m_hess) > (f(x, temp_2_m_grad, temp_2_m_hess) + newAlpha*beta*(m_grad.dot(pk)))) {
-				newAlpha = tau * newAlpha;
-				alpha = newAlpha;
+			while (f(x+ alpha*pk, temp_1_m_grad, temp_1_m_hess) > (f(x, temp_2_m_grad, temp_2_m_hess) + alpha*beta*(m_grad.dot(pk)))) {
+				alpha = tau * alpha;
 			}
 			// **************** LINE SEARCH CODE END ************/
 
