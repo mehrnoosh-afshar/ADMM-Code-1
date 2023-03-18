@@ -12,14 +12,30 @@
 #include "mex.h"
 
 
-#define WIN32_LEAN_AND_MEAN
-//#include <Windows.
+
+// #define WIN32_LEAN_AND_MEAN
+// #include <Windows.h>
+
 
 using namespace Eigen;
 bool myfunction(int i, int j) { return (i < j); }
 
-Eigen::Matrix<double, Eigen::Dynamic, 1> AdmmWithTriangleMesh(Triangle_Mesh& trimesh) {
-     MatrixXd Global_Node_vector;
+
+int main()
+{
+    // 2D exmaple 
+     Triangle_Mesh trimesh;
+    trimesh.read_mesh_data("data/data.mat", "data/data2.mat");
+    trimesh.read_point_indeces("data/Bcindex.mat", "data/Forceindex.mat");
+    trimesh.read_forcevalue("data/ForceValue.mat");
+    trimesh.weighted_masses(1.0);
+   // std::cout << trimesh.Bc_index << std::endl; 
+   // std::cout << trimesh.force_index << std::endl;
+   // std::cout << trimesh.force_value << std::endl;
+
+   
+   MatrixXd Global_Node_vector;
+
    Eigen::MatrixXi Element_Node_index;
 
    Global_Node_vector = trimesh.Node;
@@ -69,7 +85,8 @@ Eigen::Matrix<double, Eigen::Dynamic, 1> AdmmWithTriangleMesh(Triangle_Mesh& tri
     solver_m.solver_step();           // Hi this is the step that I need to be faster 
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    std::cout << solver_m.m_x << std::endl;
+    std::cout << "result" << solver_m.m_x << "\n";
+
     std::cout << "" << "time" << std::endl;
     float elapsedDouble = elapsed.count() * 1e-9;
     mexPrintf("time: %.6f       timeend", elapsedDouble);
