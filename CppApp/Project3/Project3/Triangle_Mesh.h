@@ -25,6 +25,10 @@ public:
 	void weighted_masses(float density_kgm);
 	void read_point_indeces(const char* Bcindeces_path, const char* Forceindeces_path);
 	void read_forcevalue(const char* forcevalue_vec_path);
+
+	void load_mesh_data(const mxArray* pMxArray_node, const mxArray* pMxArray_element);
+	void load_point_indeces(const mxArray* pMxArray_bc, const mxArray* pMxArray_fc);
+	void load_forcevalue(const mxArray* pMxArray_fvalue);
 	Triangle_Mesh();
 //	~Triangle_Mesh();
 
@@ -32,6 +36,45 @@ private:
 
 
 };
+
+void Triangle_Mesh::load_mesh_data(const mxArray* pMxArray_node, const mxArray* pMxArray_element) {
+	if (pMxArray_node == NULL)
+	{
+		std::cout << "Error reading existing matrix for Nodes !!!" << std::endl;
+	}
+	if (pMxArray_element == NULL)
+	{
+		std::cout << "Error reading existing matrix for Elements !!!" << std::endl;
+	}
+
+	double* pr_node = mxGetPr(pMxArray_node);
+	double* pr_element = mxGetPr(pMxArray_element);
+
+	size_t Mnode = mxGetM(pMxArray_node);
+	size_t Nnode = mxGetN(pMxArray_node);
+
+	size_t Melement = mxGetM(pMxArray_element);
+	size_t Nelement = mxGetN(pMxArray_element);
+
+	Node.resize(Mnode, Nnode);
+	Element.resize(Melement, Nelement);
+
+	for (int i = 0; i < Nnode; i++)
+	{
+		for (int j = 0; j < Mnode; j++)
+		{
+			Node(j, i) = *(pr_node + Mnode * i + j);
+		}
+	}
+
+	for (int i = 0; i < Nelement; i++)
+	{
+		for (int j = 0; j < Melement; j++)
+		{
+			Element(j, i) = *(pr_element + Melement * i + j);
+		}
+	}
+}
 
 void Triangle_Mesh::read_mesh_data(const char *Node_path, const char *Element_path)
 {
@@ -98,6 +141,45 @@ void Triangle_Mesh::read_mesh_data(const char *Node_path, const char *Element_pa
 
 }
 
+void Triangle_Mesh::load_point_indeces(const mxArray* pMxArray_bc, const mxArray* pMxArray_fc) {
+	if (pMxArray_bc == NULL)
+	{
+		std::cout << "Error reading existing matrix for Nodes !!!" << std::endl;
+	}
+	if (pMxArray_fc == NULL)
+	{
+		std::cout << "Error reading existing matrix for Elements !!!" << std::endl;
+	}
+
+	double* pr_bc = mxGetPr(pMxArray_bc);
+	double* pr_force = mxGetPr(pMxArray_fc);
+
+	size_t MBC= mxGetM(pMxArray_bc);
+	size_t NBC = mxGetN(pMxArray_bc);
+
+	size_t MNF = mxGetM(pMxArray_fc);
+	size_t NNF = mxGetN(pMxArray_fc);
+
+	Bc_index.resize(MBC, NBC);
+	force_index.resize(MNF, NNF);
+
+	for (int i = 0; i < NBC; i++)
+	{
+		for (int j = 0; j < MBC; j++)
+		{
+			Bc_index(j, i) = *(pr_bc + MBC * i + j)-1; // this -1 is beacuse Matlab indices strat from 1
+		}
+	}
+
+	for (int i = 0; i < NNF; i++)
+	{
+		for (int j = 0; j < MNF; j++)
+		{
+			force_index(j, i) = *(pr_force + MNF * i + j)-1; // this -1 is beacuse Matlab indices strat from 1
+		}
+	}
+}
+
 void Triangle_Mesh::read_point_indeces(const char* Bcindeces_path, const char* Forceindeces_path)
 {
 	MATFile* pmat_bc;
@@ -145,7 +227,7 @@ void Triangle_Mesh::read_point_indeces(const char* Bcindeces_path, const char* F
 	{
 		for (int j = 0; j < MBC; j++)
 		{
-			Bc_index(j, i) = *(pr_bc + MBC * i + j);
+			Bc_index(j, i) = *(pr_bc + MBC * i + j)-1; // this -1 is beacuse Matlab indices strat from 1
 		}
 	}
 
@@ -153,7 +235,7 @@ void Triangle_Mesh::read_point_indeces(const char* Bcindeces_path, const char* F
 	{
 		for (int j = 0; j < MNF; j++)
 		{
-			force_index(j, i) = *(pr_force + MNF * i + j);
+			force_index(j, i) = *(pr_force + MNF * i + j)-1; // this -1 is beacuse Matlab indices strat from 1
 		}
 	}
 
@@ -161,6 +243,30 @@ void Triangle_Mesh::read_point_indeces(const char* Bcindeces_path, const char* F
 	matClose(pmat_fc);
 	//OutputDebugStringW(L"Here2\n");
 
+}
+
+void Triangle_Mesh::load_forcevalue(const mxArray* pMxArray_fvalue) {
+	if (pMxArray_fvalue == NULL)
+	{
+		std::cout << "Error reading existing matrix for Nodes !!!" << std::endl;
+	}
+
+	double* pr_fvalue = mxGetPr(pMxArray_fvalue);
+
+	size_t Mfvalue = mxGetM(pMxArray_fvalue);
+	size_t Nfvalue = mxGetN(pMxArray_fvalue);
+
+
+
+	force_value.resize(Mfvalue, Nfvalue);
+
+	for (int i = 0; i < Nfvalue; i++)
+	{
+		for (int j = 0; j < Mfvalue; j++)
+		{
+			force_value(j, i) = *(pr_fvalue + Mfvalue * i + j);
+		}
+	}
 }
 
 void Triangle_Mesh::read_forcevalue(const char* forcevalue_vec_path)

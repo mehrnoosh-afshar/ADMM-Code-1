@@ -70,7 +70,7 @@
 		if (S.size() == 2)
 		{
 			 J = S(0) * S(1);
-			 I = std::pow(S(0), 2) + std::pow(S(1), 2)+1; // the one is to compensate for S(2)=1 for plane strain case
+			 I = std::pow(S(0), 2) + std::pow(S(1), 2); // the one is to compensate for S(2)=1 for plane strain case
 			 I_bar = std::pow(J, -(2.0 / 3.0)) * I;
 		}
 		else

@@ -39,22 +39,30 @@ E=3000; % These are defined in c++ but it is good if we have them as input to Me
 nu=0.49;
 
 % These are the files that I have read in c++ from mat file
+
 Forceindex = [Nf1;Nf2];
 Forceindex = zeros(size(Forceindex,2),1);
 Forcevalue(1:size(Nf1,2))= -20;
 Forcevalue(1:size(Nf2,2))=  20;
 Bcindex = NBC;
+
 Node_corr = Nodes';  % This is data.mat in c++ code 
 Element_index = Elements'; % This is data2.mat in c++ code 
 
 
+
 %% I need a Mexfile here that get 
 Final_Node_Cordinate = ADD_Mexfile(Forceindex,Forceindex,Bcindex,Node_corr,Element_index,E,nu);
-% Final_Node_Cordinate is the result of optimization 
+=======
+%% We want to put a Mexfile Here 
+Final_Node_Cordinate = main(Forceindex,Forcevalue,Bcindex,Node_corr,Element_index);
+norm(Final_Node_Cordinate)
 
 %% Plot Data 
 Current_configuration = Final_Node_Cordinate ; 
+
 nodes = reshape(Current_configuration(:,1),2,size(Nodes,2));
+
 figure;
 plot(nodes(1,:),nodes(2,:),'ok','MarkerFaceColor','r') 
 hold on 
