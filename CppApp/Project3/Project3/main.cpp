@@ -5,11 +5,11 @@
 #include"Triangle_Energy_Term.h"
 #include <LBFGS.h>
 //#include <chrono>
-#include <omp.h>
 #include "Timer.h"
 //#include "optim.hpp"
 #include"signedSVD.h"
 #include"admm_solver.h"
+#include "mex.h"
 
 
 #define WIN32_LEAN_AND_MEAN
@@ -18,25 +18,8 @@
 using namespace Eigen;
 bool myfunction(int i, int j) { return (i < j); }
 
-int main()
-{
-    
-    // 2D exmaple 
-    Triangle_Mesh trimesh;
-    trimesh.read_mesh_data("C:/Users/Mehrnoosh/Desktop/ADMM_matlab/data.mat", "C:/Users/Mehrnoosh/Desktop/ADMM_matlab/data2.mat");
-    trimesh.read_point_indeces("C:/Users/Mehrnoosh/Desktop/ADMM_matlab/Bcindex.mat", "C:/Users/Mehrnoosh/Desktop/ADMM_matlab/Forceindex.mat");
-    trimesh.read_forcevalue("C:/Users/Mehrnoosh/Desktop/ADMM_matlab/ForceValue.mat");
-    double density = 1000; // Kg/m
-    trimesh.weighted_masses(density);
-    // std::cout << trimesh.Element << std::endl; 
-   // std::cout << trimesh.force_value << std::endl;
-   // for (size_t i = 0; i < trimesh.m.size(); i++)
-   // {
-   //     std::cout << trimesh.m[i] << std::endl;
-   // }
-
-   
-   MatrixXd Global_Node_vector;
+Eigen::Matrix<double, Eigen::Dynamic, 1> AdmmWithTriangleMesh(Triangle_Mesh& trimesh) {
+     MatrixXd Global_Node_vector;
    Eigen::MatrixXi Element_Node_index;
 
    Global_Node_vector = trimesh.Node;
@@ -52,7 +35,7 @@ int main()
     ADMM::Solver solver_m;
    // solver setting  
     ADMM::Solver::Settings settings;
-    settings.admm_iters = 3;
+    settings.admm_iters = 100;
     settings.gravity = 0.0;
     settings.timestep_s = 0.001;
     std::vector<int> f (&trimesh.force_index(0), trimesh.force_index.data() + trimesh.force_index.cols() * trimesh.force_index.rows());
@@ -82,14 +65,64 @@ int main()
     solver_m.shape_external_force();
     solver_m.initialize(settings);
 
-    //auto begin = std::chrono::high_resolution_clock::now();
+    auto begin = std::chrono::high_resolution_clock::now();
     solver_m.solver_step();           // Hi this is the step that I need to be faster 
-    //auto end = std::chrono::high_resolution_clock::now();
-    //auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
-    //std::cout << "" << "time" << std::endl;
-    //std::cout << elapsed.count() * 1e-9 << "time" << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    std::cout << solver_m.m_x << std::endl;
+    std::cout << "" << "time" << std::endl;
+    float elapsedDouble = elapsed.count() * 1e-9;
+    mexPrintf("time: %.6f       timeend", elapsedDouble);
+    std::cout << elapsed.count() * 1e-9 << "time" << std::endl;
     ADMM::Solver::RuntimeData R1;
     R1 = solver_m.runtime_data();
+    return solver_m.m_x;
+}
+
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+    Triangle_Mesh trimesh;
+    trimesh.load_mesh_data(prhs[3], prhs[4]);
+    trimesh.load_point_indeces(prhs[2], prhs[0]);
+    trimesh.load_forcevalue(prhs[1]);
+    double density = 1000; // Kg/m
+    trimesh.weighted_masses(density);
+    auto mxResult = AdmmWithTriangleMesh(trimesh);
+    std::cout << mxResult << std::endl;
+    plhs[0] = mxCreateDoubleMatrix(mxResult.rows(),mxResult.cols(),mxREAL);
+    Eigen::Map<Eigen::MatrixXd> map(mxGetPr(plhs[0]), mxResult.rows(), mxResult.cols());
+    map = mxResult;
+}
+
+void admm(mxArray* forceIndex, mxArray* forceValue, mxArray* Bcindex, mxArray*Node_corr, mxArray* Element_index, int E, double nu) {
+    Triangle_Mesh trimesh;
+    trimesh.load_mesh_data(Node_corr, Element_index);
+    trimesh.load_point_indeces(Bcindex, forceIndex);
+    trimesh.load_forcevalue(forceValue);
+    double density = 1000; // Kg/m
+    trimesh.weighted_masses(density);
+    AdmmWithTriangleMesh(trimesh);
+}
+
+int main()
+{
+    
+    // 2D exmaple 
+    Triangle_Mesh trimesh;
+    trimesh.read_mesh_data("data/data.mat", "data/data2.mat");
+    trimesh.read_point_indeces("data/Bcindex.mat", "data/Forceindex.mat");
+    trimesh.read_forcevalue("data/ForceValue.mat");
+    double density = 1000; // Kg/m
+    trimesh.weighted_masses(density);
+    AdmmWithTriangleMesh(trimesh);
+    // std::cout << trimesh.Element << std::endl; 
+   // std::cout << trimesh.force_value << std::endl;
+   // for (size_t i = 0; i < trimesh.m.size(); i++)
+   // {
+   //     std::cout << trimesh.m[i] << std::endl;
+   // }
+
+   
+  
     //std::cout << R1.local_ms << "time" << std::endl;
     //std::cout << solver_m.m_x[200]  << std::endl;
     //std::cout << solver_m.m_x[100] << std::endl;
@@ -97,8 +130,4 @@ int main()
     //std::cout << solver_m.m_x[3] << std::endl;
     //std::cout << solver_m.m_x[4] << std::endl;
     //std::cout << solver_m.m_x[48] << std::endl;
-
-
-
-
 }

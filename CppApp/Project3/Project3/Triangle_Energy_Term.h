@@ -6,7 +6,6 @@
 
 
 
-
 class Triangle_Energy_Term
 {
 protected:
@@ -40,6 +39,59 @@ public:
 
 
 }; //
+
+template<typename Foo>
+	void newton(Foo& f, Eigen::VectorXd& x) {
+		int maxIter = 1000;
+		int iter = 0;
+		int n = x.size();
+		Eigen::MatrixXd m_hess;
+		Eigen::VectorXd m_grad;
+		m_hess.resize(n, n);
+		m_grad.resize(n);
+		auto epsilon = 1e-7;
+		auto tau = 0.8;
+		auto alpha = 1.0;
+		auto beta = 0.1;
+		for (; ;) {
+			auto fx = f(x, m_grad, m_hess);
+
+			// ****************** MMODIFYING HESSIAN TO ENSURE POSITIVE DEFINITENESS *************/
+			auto eigenValues = m_hess.eigenvalues();
+			auto minElem = std::min_element(eigenValues.begin(), eigenValues.end(),
+                           [](const std::complex<double>& a, const std::complex<double>& b)
+                             { return abs(a) < abs(b); });
+
+			auto M = std::max(0.0, (*minElem).real()) * Eigen::MatrixXd::Identity(n, n);
+			auto A = m_hess + M;
+			// ****************** MMODIFYING HESSIAN TO ENSURE POSITIVE DEFINITENESS END *************/
+
+			// auto begin2 = std::chrono::high_resolution_clock::now();
+			// **************** LINE SEARCH CODE ************/
+			auto pk = -m_grad;
+			Eigen::MatrixXd temp_1_m_hess;
+			Eigen::VectorXd temp_1_m_grad;
+			Eigen::MatrixXd temp_2_m_hess;
+			Eigen::VectorXd temp_2_m_grad;
+			while (f(x+ alpha*(pk), temp_1_m_grad, temp_1_m_hess) > (f(x, temp_2_m_grad, temp_2_m_hess) + alpha*beta*(m_grad.dot(pk)))) {
+				alpha = tau * alpha;
+			}
+			// **************** LINE SEARCH CODE END ************/
+
+			if (iter == maxIter) {
+				return;
+			}
+			auto gnorm = m_grad.norm();
+			// TODO: (ddesilva) put these values as constants outside of this function
+			if(gnorm <= 1e-3 || gnorm <= 1e-5 * x.norm())
+            {
+                return;
+            }
+			// x = x - (A.inverse() * m_grad);
+			x = A.llt().solve(A*x - m_grad*alpha);
+			iter++;
+		}
+	}
 
 
 class HyperElastic_Triangle : public Triangle_Energy_Term 
